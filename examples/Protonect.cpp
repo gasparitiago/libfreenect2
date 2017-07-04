@@ -353,11 +353,45 @@ int main(int argc, char *argv[])
       std::cout << "timeout!" << std::endl;
       return -1;
     }
+    
+    /*
+    TIAGO:
+    ESSE SÃO OS FRAMES QUE VOCÊ PRECISA!
+    BASTA SALVAR ESSE "depth" EM ALGUM LUGAR DEPOIS DE SER CRIADO.
+    NOTA 1: LEMBRE DE SALVAR O ARQUIVO EM UM FORMATO SEM PERDAS (PNG POR EXEMPLO).
+    NOTA 2: CONFERE SE OS VALORES DE DEPTH ESTÃO ENTRE 0-255 OU 0-1 POR EXEMPLO.
+    
+    LENDO A CLASSE FRAME QUE SE ENCONTRA NO ARQUIVO: include/libfreenect2/frame_listener.hpp
+    É POSSÍVEL VER QUE CADA FRAME POSSUI UM BUFFER CHAMADO "data" DO TIPO unsigned char (0-255),
+    GERALMENTE UTILIZADO POR IMAGENS EM TONS DE CINZA, OU SEJA, BASTA DIRECIONAR ELE PRA UM ARQUIVO.
+    O QUE VOCÊ PODE FAZER É ABRIR UM ARQUIVO BINÁRIO E DIRECIONAR OS DADOS PRA ELE.
+    ESSES ARQUIVOS BINÁRIOS PODEM SER SALVOS EM PGM POR EXEMPLO, OU VOCÊ EXPORTAR USANDO ALGUMA LIB DE I/O DE IMAGENS.
+    OPINIÃO PRÓPRIA: ACHO QUE O OPENCV É MUITO PESADO PRA FAZER SÓ ISSO!
+    
+    INSERIR ISSO LOGO ABAIXO DA LINHA, PODE SER QUE DÊ CERTO, NÃO TESTEI POIS NÃO TENHO COMPILADOR C++ AQUI AGORA:
+    
+    int width = depth.width;
+    int height = depth.height;
+    ofstream OutFile;
+    OutFile.open("arquivo.bin", ios::out | ios::binary);
+    OutFile.write( (char*)&(depth.data), width * height * sizeof(unsigned char));
+    OutFile.close()
+    
+    Não garanto que funcione, tente utilizar .pgm no lugar de .bin pra ver se algum leitor de imagem consegue ler o arquivo.
+    */
+    
     libfreenect2::Frame *rgb = frames[libfreenect2::Frame::Color];
     libfreenect2::Frame *ir = frames[libfreenect2::Frame::Ir];
     libfreenect2::Frame *depth = frames[libfreenect2::Frame::Depth];
 /// [loop start]
 
+    /*
+    TIAGO:
+    ESSE "REGISTRATION" É O QUE VOCÊ VAI FAZER COM O DEPTH EM CIMA DA IMAGEM DA CÂMERA EXTERNA
+    AQUI NESSE CÓDIGO ELE FAZ COM A IMAGEM DO PRÓPRIO KINECT.
+    O UNDISTORTED E O REGISTERED SÃO O OUTPUT DESSA FUNÇÃO. NO CASO, ELE USA ALGUMA "CALIBRAÇÃO" DEFAULT,
+    POIS ELE JÁ SABE OS PARÂMETROS E A DISTÂNCIA ENTRE AS CÂMERAS DO PRÓPRIO KINECT.
+    */
     if (enable_rgb && enable_depth)
     {
 /// [registration]
